@@ -1,0 +1,23 @@
+# MATPAC / MATPAC++ for EVAR linear evaluation.
+# Override weight_file on the CLI to switch between MATPAC and MATPAC++.
+audio_repr: ar_matpac.AR_MATPAC
+weight_file: /home/sagemaker-user/models/matpac/inference_matpac/ckpt_path/matpac_10_2048.pt
+feature_d: 3840
+sample_rate: 16000
+
+# Log-mel frontend params, in SAMPLES @ 16 kHz (EVAR/torchaudio convention).
+# Informational only — MATPAC computes the mel internally (win 0.025 s / hop 0.01 s).
+n_fft: 400              # = window
+window_size: 400        # 400 / 16000 = 25 ms
+hop_size: 160           # 160 / 16000 = 10 ms
+n_mels: 80
+f_min: 50
+f_max: 8000
+window: hanning
+
+# Linear-probe parameters — from MATPAC paper §IV-A "Linear probing evaluation"
+# (arXiv:2502.12031): single FC layer, batch size 128, lr 1e-4, ADAM, best-val-loss, 5 repeats.
+lr_lineareval: 0.0001   # 1e-4 (paper). EVAR uses this as the linear classifier's Adam lr.
+batch_size: 128         # paper. EVAR's embedding-extraction loader batch — lower if the small GPU OOMs.
+report_per_epochs: 50
+early_stop_epochs: 20   # patience; paper keeps best-val-loss model (EVAR/M2D default patience)
